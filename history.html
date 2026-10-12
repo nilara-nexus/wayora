@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b1729">
+
+  <title>My bookings - Wayora</title>
+  <meta name="description" content="Manage Wayora bookings, view journey details, download PDF tickets, and review cancellations.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    :root {
+      --h-ink: #17263b;
+      --h-muted: #78869a;
+      --h-line: #e5eaf0;
+      --h-bg: #f6f8fb;
+      --h-blue: #2856a4;
+      --h-green: #26744f;
+      --h-red: #b44242;
+    }
+
+    body {
+      background: var(--h-bg);
+      color: var(--h-ink);
+      font-family: "DM Sans", sans-serif;
+    }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(255,255,255,.97);
+      border-bottom: 1px solid var(--h-line);
+      backdrop-filter: blur(14px);
+    }
+
+    .history-hero {
+      position: relative;
+      overflow: hidden;
+      padding: 68px 24px 72px;
+      background: #101e32;
+      color: white;
+      
+      
+      
+    }
+
+    /*.history-hero::after {
+      content: "";
+      position: absolute;
+      width: 350px;
+      height: 350px;
+      right: 8%;
+      top: -220px;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 50%;
+      box-shadow:
+        0 0 0 45px rgba(255,255,255,.025),
+        0 0 0 90px rgba(255,255,255,.025);
+      pointer-events: none;
+    }*/
+
+    .history-hero-inner {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 28px;
+      max-width: 1160px;
+      margin: auto;
+    }
+
+    .history-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      color: #c4cfdf;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+
+    .history-eyebrow::before {
+      content: "";
+      width: 24px;
+      height: 2px;
+      background: #9fb6d4;
+    }
+
+    .history-hero h1 {
+      margin: 0;
+      font: 700 clamp(36px, 5vw, 58px)/1.1 "Manrope", sans-serif;
+      letter-spacing: -2px;
+    }
+
+    .history-hero h1 span {
+      color: #9ed9d1;
+    }
+
+    .history-hero p {
+      max-width: 490px;
+      margin: 18px 0 0;
+      color: #c3ccda;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .history-hero .btn {
+      flex-shrink: 0;
+      border-radius: 9px;
+      white-space: nowrap;
+    }
+
+    .history-wrap {
+      max-width: 1160px;
+      margin: auto;
+      padding: 42px 24px 76px;
+    }
+
+    .history-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .history-heading h2 {
+      margin: 0;
+      font: 800 25px "Manrope", sans-serif;
+      letter-spacing: -.7px;
+    }
+
+    .history-heading p {
+      margin: 8px 0 0;
+      color: var(--h-muted);
+      font-size: 12px;
+    }
+
+    .history-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      padding: 5px;
+      border: 1px solid var(--h-line);
+      border-radius: 11px;
+      background: white;
+    }
+
+    .page-hero-art img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .filter-chip {
+      padding: 10px 15px;
+      border: 0;
+      border-radius: 7px;
+      background: transparent;
+      color: #647188;
+      font: 600 12px "DM Sans", sans-serif;
+      cursor: pointer;
+      transition: .2s ease;
+    }
+
+    .filter-chip:hover {
+      background: #f0f3f7;
+    }
+
+    .filter-chip.active {
+      background: var(--h-ink);
+      color: white;
+    }
+
+    .booking-history {
+      display: grid;
+      gap: 17px;
+    }
+
+    .ticket-card {
+      display: grid;
+      grid-template-columns: 145px minmax(0, 1fr);
+      overflow: hidden;
+      border: 1px solid var(--h-line);
+      border-radius: 16px;
+      background: white;
+      box-shadow: 0 4px 20px rgba(20,35,55,.025);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .ticket-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(20,35,55,.065);
+    }
+
+    .ticket-rail {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 23px 20px;
+      background: #f0f4f9;
+      border-right: 1px dashed #cfd9e6;
+    }
+
+    .ticket-mode {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border: 1px solid #dce4ef;
+      border-radius: 11px;
+      background: white;
+      font-size: 21px;
+    }
+
+    .ticket-rail small {
+      color: #6e7d91;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+    }
+
+    .ticket-rail b {
+      font: 800 12px "Manrope", sans-serif;
+      overflow-wrap: anywhere;
+    }
+
+    .ticket-main {
+      min-width: 0;
+      padding: 24px 25px;
+    }
+
+    .ticket-topline {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 21px;
+    }
+
+    .ticket-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--h-green);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .ticket-status::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .ticket-status.cancelled-status {
+      color: var(--h-red);
+    }
+
+    .ticket-route {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 35px minmax(0, 1fr);
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 23px;
+      border-bottom: 1px solid var(--h-line);
+    }
+
+    .ticket-route > div {
+      min-width: 0;
+    }
+
+    .ticket-route small,
+    .ticket-meta small {
+      display: block;
+      margin-bottom: 7px;
+      color: #8a96a8;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .ticket-route b {
+      display: block;
+      font: 800 clamp(17px, 2.4vw, 24px) "Manrope", sans-serif;
+      overflow-wrap: anywhere;
+    }
+
+    .route-arrow {
+      color: #7f8da0;
+      text-align: center;
+      font-size: 19px;
+    }
+
+    .ticket-meta {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 22px 16px;
+      padding: 23px 0;
+    }
+
+    .ticket-meta > span {
+      min-width: 0;
+    }
+
+    .ticket-meta b {
+      display: block;
+      color: #27364b;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+    }
+
+    .ticket-actions {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 9px;
+      padding-top: 17px;
+      border-top: 1px solid var(--h-line);
+    }
+
+    .ticket-actions .btn {
+      min-height: 38px;
+      border-radius: 8px;
+      font-size: 11px;
+    }
+
+    .ticket-actions .btn-outline {
+      border: 1px solid var(--h-line);
+      background: white;
+      color: #46556a;
+    }
+
+    .ticket-actions .btn-outline:hover {
+      background: #f5f7fa;
+    }
+
+    .ticket-cancelled .ticket-rail {
+      background: #f7f2f2;
+    }
+
+    .refund-status {
+      margin-bottom: 15px;
+      padding: 11px 13px;
+      border: 1px solid #eadede;
+      border-radius: 8px;
+      background: #fbf7f7;
+      color: #944747;
+      font-size: 11px;
+      line-height: 1.7;
+    }
+
+    .empty-state {
+      padding: 62px 22px;
+      border: 1px dashed #d5deea;
+      border-radius: 16px;
+      background: white;
+      text-align: center;
+    }
+
+    .empty-icon {
+      display: grid;
+      place-items: center;
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 20px;
+      border: 1px solid var(--h-line);
+      border-radius: 15px;
+      color: #64768e;
+      font-size: 26px;
+    }
+
+    .empty-state h3 {
+      margin: 0;
+      font: 800 20px "Manrope", sans-serif;
+    }
+
+    .empty-state p {
+      max-width: 390px;
+      margin: 11px auto 22px;
+      color: var(--h-muted);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .empty-state .btn {
+      border-radius: 9px;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: grid;
+      place-items: center;
+      overflow-y: auto;
+      padding: 20px;
+      background: rgba(9,19,34,.66);
+      backdrop-filter: blur(5px);
+    }
+
+    .modal-backdrop.hidden {
+      display: none;
+    }
+
+    .modal-card {
+      position: relative;
+      width: min(100%, 460px);
+      padding: 30px;
+      border: 1px solid #e8edf3;
+      border-radius: 17px;
+      background: white;
+      box-shadow: 0 25px 80px rgba(0,0,0,.18);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 15px;
+      right: 17px;
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--h-line);
+      border-radius: 9px;
+      background: white;
+      color: #536176;
+      font-size: 23px;
+      cursor: pointer;
+    }
+
+    .modal-symbol {
+      display: grid;
+      place-items: center;
+      width: 45px;
+      height: 45px;
+      margin-bottom: 18px;
+      border: 1px solid var(--h-line);
+      border-radius: 12px;
+      color: #566a84;
+      font-size: 23px;
+    }
+
+    .modal-card h2 {
+      margin: 0;
+      font: 800 22px "Manrope", sans-serif;
+    }
+
+    .modal-card > p {
+      margin: 11px 0 20px;
+      color: var(--h-muted);
+      font-size: 12px;
+      line-height: 1.8;
+    }
+
+    .refund-box {
+      padding: 15px;
+      border: 1px solid var(--h-line);
+      border-radius: 11px;
+      background: #f8fafc;
+    }
+
+    .refund-box > div {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 0;
+      font-size: 12px;
+    }
+
+    .refund-box > div + div {
+      border-top: 1px solid var(--h-line);
+    }
+
+    .refund-box span {
+      color: #718096;
+    }
+
+    .refund-box b {
+      color: var(--h-ink);
+      text-align: right;
+    }
+
+    .refund-box small {
+      display: block;
+      margin-top: 12px;
+      color: #7b8798;
+      font-size: 10px;
+      line-height: 1.8;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .modal-actions .btn {
+      flex: 1;
+      min-height: 42px;
+      border-radius: 9px;
+      cursor: pointer;
+    }
+
+    .btn-danger {
+      border: 1px solid var(--h-red);
+      background: var(--h-red);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #963535;
+    }
+
+    .history-notice {
+      margin: 22px 0 0;
+      color: #8590a0;
+      font-size: 11px;
+      line-height: 1.8;
+    }
+
+    .site-footer {
+      border-top: 1px solid var(--h-line);
+    }
+
+    @media (max-width: 700px) {
+      .history-hero {
+        padding: 48px 21px 52px;
+      }
+
+      .history-hero-inner {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .history-hero h1 {
+        letter-spacing: -1.4px;
+      }
+
+      .history-wrap {
+        padding: 29px 15px 52px;
+      }
+
+      .history-toolbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .ticket-card {
+        grid-template-columns: 1fr;
+      }
+
+      .ticket-rail {
+        display: grid;
+        grid-template-columns: 42px 1fr auto;
+        align-items: center;
+        gap: 12px;
+        padding: 13px 16px;
+        border-right: 0;
+        border-bottom: 1px dashed #cfd9e6;
+      }
+
+      .ticket-main {
+        padding: 19px 16px;
+      }
+
+      .ticket-meta {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 19px 12px;
+        padding: 20px 0;
+      }
+
+      .ticket-route {
+        grid-template-columns: minmax(0, 1fr) 25px minmax(0, 1fr);
+        gap: 6px;
+        padding-bottom: 19px;
+      }
+
+      .modal-card {
+        padding: 25px 20px;
+      }
+
+      .modal-actions {
+        flex-direction: column-reverse;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+
+
+  </style>
+</head>
+
+<body>
+
+  <header class="site-header">
+    <a class="brand" href="index.html" style="line-height: 1.8;">
+      <span class="brand-mark">W</span>
+      <span>wayora<small>JOURNEYS MADE SIMPLE</small></span>
+    </a>
+
+    <button class="menu-toggle" type="button"
+      aria-label="Toggle menu" aria-expanded="false">☰</button>
+
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="booking.html">Book tickets</a>
+      <a class="active" href="history.html">My bookings</a>
+      <a href="enquiry.html">Support</a>
+    </nav>
+
+    <a class="nav-cta" href="booking.html">Book a trip <span>↗</span></a>
+  </header>
+
+  <main class="inner-page">
+
+    <section class="page-hero"><div class="eyebrow light"><span></span> YOUR TRAVEL JOURNEY</div><h1>Every journey.<br><span>One place.</span></h1><p>Keep every journey organized. Review your bookings,
+            download printable tickets and manage cancellations
+            from one simple place.</p><div class="page-hero-art"><img src="assets/city-break.png" alt="City skyline at dusk"></div></section>
+
+  
+
+    <section class="history-wrap">
+      <div class="history-toolbar">
+        <div class="history-heading">
+          <h2>Your bookings</h2>
+          <p id="bookingSummary">Your journeys will appear here.</p>
+        </div>
+
+        <div class="history-filters" aria-label="Filter bookings">
+          <button class="filter-chip active" type="button"
+            data-filter="all" aria-pressed="true">All trips</button>
+
+          <button class="filter-chip" type="button"
+            data-filter="Confirmed" aria-pressed="false">Confirmed</button>
+
+          <button class="filter-chip" type="button"
+            data-filter="Cancelled" aria-pressed="false">Cancelled</button>
+        </div>
+      </div>
+
+      <div id="bookingHistory" class="booking-history" aria-live="polite">
+        <div class="empty-state">
+          <div class="empty-icon">↗</div>
+          <h3>Your next journey starts here.</h3>
+          <p>
+            Complete a demo booking and your ticket details
+            will appear here.
+          </p>
+          <a class="btn btn-primary" href="booking.html">Explore journeys →</a>
+        </div>
+      </div>
+
+      <p class="history-notice">
+        Demo notice: bookings are stored in this browser on this device.
+        Generated tickets are not valid for actual travel.
+      </p>
+    </section>
+  </main>
+
+  <div class="modal-backdrop hidden" id="cancelModal"
+    role="dialog" aria-modal="true"
+    aria-labelledby="cancelTitle" aria-describedby="cancelDetails">
+
+    <div class="modal-card">
+      <button class="modal-close" id="closeCancel"
+        type="button" aria-label="Close cancellation dialog">×</button>
+
+      <div class="modal-symbol">↶</div>
+
+      <h2 id="cancelTitle">Cancel this booking?</h2>
+
+      <p id="cancelDetails">
+        Review the demo cancellation policy before continuing.
+      </p>
+
+      <div class="refund-box">
+        <div>
+          <span>Original fare</span>
+          <b id="cancelAmount">INR 0.00</b>
+        </div>
+
+        <div>
+          <span>Estimated refund</span>
+          <b id="refundAmount">INR 0.00</b>
+        </div>
+
+        <div>
+          <span>Non-refundable amount</span>
+          <b id="retainedAmount">INR 0.00</b>
+        </div>
+
+        <small id="refundNote">
+          This is a demo calculation. No real payment or refund will occur.
+        </small>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-outline" id="keepBooking" type="button">
+          Keep booking
+        </button>
+
+        <button class="btn btn-danger" id="confirmCancel" type="button">
+          Confirm cancellation
+        </button>
+      </div>
+    </div>
+  </div>
+
+<footer class="site-footer"><a class="brand footer-brand" href="index.html" style="line-height: 1.9;"><span class="brand-mark">W</span><span>wayora<small>JOURNEYS MADE SIMPLE</small></span></a><p>Go thoughtfully. Get there happily.</p><div class="footer-links"><a href="index.html">Home</a><a href="booking.html">Book tickets</a><a href="enquiry.html">Support</a></div><small>© <span data-year></span> Wayora. Travel booking experience.</small></footer>
+
+<script src="wayora-auth.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="app.js"></script>
+  <script src="history.js"></script>
+
+</body>
+</html>
